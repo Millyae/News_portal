@@ -1,0 +1,47 @@
+from news_portal.models import *
+from django.contrib.auth.models import User
+
+user1 = User.objects.create_user('user1')
+user2 = User.objects.create_user('user2')
+
+author1 = Author.objects.create(user=user1)
+author2 = Author.objects.create(user=user2)
+
+Category.objects.create(name='Спорт')
+Category.objects.create(name='Образование')
+Category.objects.create(name='Политика')
+Category.objects.create(name='Технология')
+
+post1 = Post.objects.create(author=author1, post_type='статья', title='Статья 1', text='Содержание статьи 1', rating=0)
+post2 = Post.objects.create(author=author2, post_type='статья', title='Статья 2', text='Содержание статьи 2', rating=0)
+post1 = Post.objects.create(author=author1, post_type='новость', title='Носовти 1', text='Содержание новостей 11', rating=0)
+
+post1.categories.add(Category.objects.get(name='Спорт'))
+post1.categories.add(Category.objects.get(name='Образование'))
+post2.categories.add(Category.objects.get(name='Технология'))
+news1.categories.add(Category.objects.get(name='Политика'))
+
+comment1 = Comment.objects.create(post=post1, user=user1, text='Комментария (1) для 1 поста ', rating=2)
+comment2 = Comment.objects.create(post=post2, user=user2, text='Комментария (1) для 2 поста', rating=3)
+comment3 = Comment.objects.create(post=post1, user=user2, text='Комментария (2) для 1 поста', rating=5)
+comment4 = Comment.objects.create(post=news1, user=user1, text='Комментария (1) для новости 1', rating=1)
+
+post1.dislike()
+post1.like()
+comment1.like()
+comment2.like()
+comment3.dislike()
+comment4.like()
+
+author1.update_rating()
+author2.update_rating()
+
+best_author = Author.objects.all().order_by('-rating').first()
+print(f"Best user: {best_author.user.username}, Rating: {best_author.rating}")
+
+best_post = Post.objects.filter(post_type='article').order_by('-rating').first()
+print(f"Date: {best_post.created_at}, Author: {best_post.author.user.username}, Rating: {best_post.rating}, Title: {best_post.title}, Preview: {best_post.text[:124] + '..' if len(best_post.text) > 124 else best_post.text}")
+
+comments_to_best_post = Comment.objects.filter(post=best_post)
+for comment in comments_to_best_post:
+    print(f"Date: {comment.created_at}, User: {comment.user.username}, Rating: {comment.rating}, Text: {comment.text}")
